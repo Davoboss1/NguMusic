@@ -1,16 +1,20 @@
 import { getAlbums } from "@/api";
 import BackgroundView from "@/components/containers/BackgroundView";
+import { TextButton } from "@/components/elements/Button";
 import { Colors } from "@/constants/Colors";
 import { TextSize } from "@/constants/Size"
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import CreateAlbumModal from "../../others/createAlbumModal";
+import { EmptyDisplay } from "@/components/elements/EmptyDisplay";
 
 const AlbumsView = () => {
 
-    const { data: albums, isFetching: albums_is_fetching } =
+    const { data: albums, isFetching } =
         useQuery({
             queryKey: ["all_albums"],
             queryFn: () => getAlbums(),
@@ -28,21 +32,28 @@ const AlbumsView = () => {
         id: album?.id,
     }));
 
+    const [showCreateAlbumModal, setShowCreateAlbumModal] = useState(false);
+
+
     return (
         <BackgroundView>
-            <Text style={{
-                color: "white",
-                fontSize: TextSize.md,
-                fontWeight: "bold",
-                textAlign: "center",
-                borderBottomColor: Colors.primary,
+        <CreateAlbumModal show={showCreateAlbumModal} onClose={() => setShowCreateAlbumModal(false)} />
+
+            <View style={{
+                flexDirection: "row", paddingHorizontal: 10, borderBottomColor: Colors.primary,
                 borderBottomWidth: 1,
-                paddingVertical: 10
             }}>
-                Albums
-            </Text>
+
+                <Text style={styles.mainText}>
+                    Albums
+                </Text>
+                <TextButton style={{ marginLeft: "auto" }} onPress={() => setShowCreateAlbumModal(true)}>Create +</TextButton>
+            </View>
+
             <View style={{ flex: 1 }}>
-                <FlatList contentContainerStyle={
+                <FlatList ListEmptyComponent={<>
+            {isFetching ? <ActivityIndicator color={Colors.primary} size={"small"} /> : <EmptyDisplay />}
+            </>} contentContainerStyle={
                     styles.mainContainer
                 } data={albumList} renderItem={({ item }) => (
                     <TouchableOpacity style={{
@@ -81,12 +92,22 @@ const AlbumsView = () => {
 }
 
 const styles = StyleSheet.create({
+    mainText: {
+        color: "white",
+        fontSize: TextSize.md,
+        fontWeight: "bold",
+        textAlign: "center",
+        paddingVertical: 10
+    },
     mainContainer: {
         flexDirection: "row",
         justifyContent: "space-around",
         padding: 20,
         flexWrap: "wrap",
         width: "100%"
+    },
+    mainTitleText: {
+
     },
     thumbnail: {
         width: "45%",

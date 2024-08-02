@@ -1,5 +1,6 @@
 import { getAlbum } from "@/api";
 import BackgroundView from "@/components/containers/BackgroundView";
+import { EmptyDisplay } from "@/components/elements/EmptyDisplay";
 import { Colors } from "@/constants/Colors";
 import { TextSize } from "@/constants/Size"
 import { track } from "@/types";
@@ -7,7 +8,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams } from "expo-router";
-import { FlatList, StyleSheet, Text, View } from "react-native"
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native"
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 const AlbumsView = () => {
@@ -49,7 +50,7 @@ const AlbumsView = () => {
     const listHeader = (
         <>
             <View style={styles.mainContainer}>
-                <Image style={styles.thumbnail} source={require("@/assets/images/album.jpeg")} />
+                <Image style={styles.thumbnail} source={{ uri: albumData.thumbnail }} />
                 <View style={styles.albumsTextsContainer}>
                     <Text style={styles.albumText}>
                         Album Name: {albumData.name}
@@ -93,7 +94,11 @@ const AlbumsView = () => {
             }}>
                 {albumData.name}
             </Text>
-            <FlatList data={albumData.tracks} ListHeaderComponent={listHeader}
+
+            
+            <FlatList data={albumData.tracks} ListEmptyComponent={<>
+            {isFetching ? <ActivityIndicator color={Colors.primary} size={"small"} /> : <EmptyDisplay />}
+            </>} ListHeaderComponent={listHeader}
                 renderItem={({ item }) => (
                     <Link href={{
                         pathname: "/home/now_playing",
@@ -116,7 +121,7 @@ const AlbumsView = () => {
                                     {item.name}
                                 </Text>
                                 <Text style={{ color: "white", marginTop: 5 }}>
-                                    {albumData.artist}
+                                    {albumData.artist}  • {item.featured_artists}
                                 </Text>
                             </View>
                             <MaterialCommunityIcons name="chevron-right" size={24} color="white" style={{ marginLeft: "auto" }} />

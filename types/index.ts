@@ -4,6 +4,7 @@ export type user = {
   email: string,
   first_name: string,
   last_name: string,
+  artist_name: string
 }
 
 export type dropdownItem = {

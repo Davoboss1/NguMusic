@@ -10,13 +10,14 @@ import { showToast } from "@/utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { Link, Redirect } from "expo-router";
+import { Link, Redirect, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, ToastAndroid, View } from "react-native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 const LoginView = () => {
     const [setAccessToken, setRefreshToken, setUser] = usePersistedStore((state) => [state.setAccessToken,state.setRefreshToken, state.setUser]);
+    const router = useRouter();
     const loginMutation = useMutation({
         mutationFn: LoginRequest,
         onSuccess(data) {
@@ -24,16 +25,13 @@ const LoginView = () => {
             setRefreshToken(data.refresh);
             setUser(data.user);
             showToast("Logged in successfully.", "success");
+            router.push("/home/")
         },
     });
     const [loginInformation, setLoginInformation] = useState({
         email: "",
         password: ""
     });
-
-    if (loginMutation.isSuccess) {
-        return <Redirect href="/home/" />;
-    }
 
     return (
         <BackgroundView>

@@ -1,16 +1,17 @@
 import { getArtists } from "@/api";
 import BackgroundView from "@/components/containers/BackgroundView";
+import { EmptyDisplay } from "@/components/elements/EmptyDisplay";
 import { Colors } from "@/constants/Colors";
 import { TextSize } from "@/constants/Size"
 import { FontAwesome, FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 const ArtistsView = () => {
 
-    const { data: artists, isFetching: artists_is_fetching } =
+    const { data: artists, isFetching } =
         useQuery({
             queryKey: ["all_artists"],
             queryFn: () => getArtists(),
@@ -42,7 +43,9 @@ const ArtistsView = () => {
                 Artists
             </Text>
             <View style={{ flex: 1 }}>
-                <FlatList contentContainerStyle={
+                <FlatList ListEmptyComponent={<>
+            {isFetching ? <ActivityIndicator color={Colors.primary} size={"small"} /> : <EmptyDisplay />}
+            </>} contentContainerStyle={
                     styles.mainContainer
                 } data={artistList} renderItem={({ item }) => (
                     <TouchableOpacity style={{

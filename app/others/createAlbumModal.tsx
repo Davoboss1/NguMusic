@@ -15,63 +15,32 @@ import { z } from "zod";
 import { parseZodError, showToast } from "@/utils";
 import { GradientButton } from "@/components/elements/Button";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAlbums, getGenres, getUserAlbums, uploadTrack } from "@/api";
+import { getAlbums, getGenres, uploadAlbum, uploadTrack } from "@/api";
+
 
 const createMusicSchema = z.object({
     name: z.string().trim().min(1, { message: "Please enter a valid name" }),
-    track_no: z.number({ message: "Please enter a valid nunber" }),
-    album: z.number({ message: "Please select an album" }),
-    genre: z.number({ message: "Please select a genre" }),
+    description: z.string().trim().min(10, { message: "Please enter a valid description, minimum of 10 characters" }),
 });
 
-const createMusicModal = ({ show, onClose }: { show: boolean, onClose: () => void }) => {
-  
-    const { data: genres, isFetching: genres_is_fetching } =
-        useQuery({
-            queryKey: ["genres"],
-            queryFn: () => getGenres(),
-        });
-
-    const { data: albums, isFetching: albums_is_fetching } =
-        useQuery({
-            queryKey: ["useralbums"],
-            queryFn: () => getUserAlbums(),
-        });
-
-    const genresList: dropdownItem[] = genres?.map((genre: any) => ({
-        label: genre.name,
-        value: genre.id,
-        icon: "album"
-    }));
-
-    const albumList: dropdownItem[] = albums?.map((album: any) => ({
-        label: album.name,
-        value: album.id,
-        icon: "album"
-    }));
-
+const createAlbumModal = ({ show, onClose }: { show: boolean, onClose: () => void }) => {
+   
     const [musicInformation, setMusicInformation] = useState({
         name: "",
-        track_no: 1,
-        featured_artists: "",
-        album: "",
-        genre: "",
-        file: {
+        description: "",
+        thumbnail: {
             uri: "",
             name: "",
             type: ""
         }
     });
 
-    const createTrackMutation = useMutation({
-        mutationFn: uploadTrack, onSuccess() {
+    const createAlbumMutation = useMutation({
+        mutationFn: uploadAlbum, onSuccess() {
             setMusicInformation({
                 name: "",
-                track_no: 1,
-                featured_artists: "",
-                album: "",
-                genre: "",
-                file: {
+                description: "",
+                thumbnail: {
                     uri: "",
                     name: "",
                     type: ""
@@ -100,67 +69,53 @@ const createMusicModal = ({ show, onClose }: { show: boolean, onClose: () => voi
                 <ScrollView >
                     <View style={{ paddingBottom: 15 }}>
 
-                        <Input errorText={errors["track_no"]} label={"Track Number "}
-                            onChangeText={(text) => updateMusicInformation("track_no", parseInt(text))} placeholder="Enter track number" containerStyle={{
-                                margin: 10,
-                            }} value={musicInformation.track_no as any || ""} />
-
-
-                        <Input errorText={errors["name"]} label={"Song title "}
-                            onChangeText={(text) => updateMusicInformation("name", text)} placeholder="Enter song name" containerStyle={{
+        
+                        <Input errorText={errors["name"]} label={"Enter Album name "}
+                            onChangeText={(text) => updateMusicInformation("name", text)} placeholder="Enter album name" containerStyle={{
                                 margin: 10,
                             }} value={musicInformation.name} />
 
-                        <Input errorText={errors["featured_artists"]} label={"Featured Artists"}
-                            onChangeText={(text) => updateMusicInformation("featured_artists", text)} placeholder="Enter featured artists" containerStyle={{
+                        <Input errorText={errors["description"]} label={"Description"}
+                            onChangeText={(text) => updateMusicInformation("description", text)} placeholder="Enter description" containerStyle={{
                                 margin: 10,
-                            }} value={musicInformation.featured_artists} />
-
-
-                        <Dropdown currentItem={albumList?.find((val) => val.value === musicInformation.album)} errorText={errors["album"]} label="Select Album" data={albumList} onChange={(val) => {
-                            updateMusicInformation("album", val)
-                        }} />
-
-                        <Dropdown currentItem={genresList?.find((val) => val.value === musicInformation.genre)} errorText={errors["genre"]} label="Select Genre" data={genresList} onChange={(val) => {
-                            updateMusicInformation("genre", val)
-                        }} />
+                            }} value={musicInformation.description} />
 
                         <View style={{ margin: 10 }}>
                             <Text style={{
                                 color: "white",
                                 marginBottom: 10
                             }}>
-                                Select Audio Wav File
+                                Select Thumbnail Image
                             </Text>
 
                             <TextButton onPress={() => {
                                 DocumentPicker.getDocumentAsync({
-                                    type: 'audio/*',
+                                    type: 'image/*',
                                     copyToCacheDirectory: true
                                 })
                                     .then(res => {
                                         console.log(res);
                                         if (res.assets && res.assets[0]) {
-                                            setMusicInformation({ ...musicInformation, file: { uri: res.assets[0].uri, name: res.assets[0].name, type: res.assets[0].mimeType as string } })
+                                            setMusicInformation({ ...musicInformation, thumbnail: { uri: res.assets[0].uri, name: res.assets[0].name, type: res.assets[0].mimeType as string } })
                                         }
                                     })
                                     .catch(err => {
                                         console.log(err);
                                     });
                             }} leftIcon={<FontAwesome6 name="upload" size={20} style={{ marginRight: 10 }} color={Colors.primary} />} style={{ width: "auto" }} textStyle={{ fontSize: TextSize.sm, color: Colors.primary }} >
-                                {musicInformation?.file?.name || "Browse and select .wav file"}
+                                {musicInformation?.thumbnail?.name || "Browse and select an image file"}
                             </TextButton>
-                            <Text style={{ color: "red" }}>{musicInformation.file?.uri ? "" : "Please select a file"}</Text>
+                            <Text style={{ color: "red" }}>{musicInformation.thumbnail?.uri ? "" : "Please select a file"}</Text>
                         </View>
-                        <GradientButton loading={createTrackMutation.isPending} onPress={() => {
+                        <GradientButton loading={createAlbumMutation.isPending} onPress={() => {
 
-                            if (zodValidity.success && musicInformation.file?.uri) {
-                                createTrackMutation.mutate(musicInformation);
+                            if (zodValidity.success && musicInformation.thumbnail?.uri) {
+                                createAlbumMutation.mutate(musicInformation);
                             }
                         }} style={{ marginHorizontal: 10 }}>
                             Upload Music
                         </GradientButton>
-                        {createTrackMutation.isSuccess && <Text style={{
+                        {createAlbumMutation.isSuccess && <Text style={{
                             backgroundColor: Colors.success,
                             padding: 15,
                             color: "white",
@@ -168,7 +123,7 @@ const createMusicModal = ({ show, onClose }: { show: boolean, onClose: () => voi
                             borderRadius: 5,
                             textAlign: "center"
                         }} >
-                            Track has been created successfully.
+                            Album has been created successfully.
                         </Text>}
 
                     </View>
@@ -193,4 +148,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default createMusicModal;
+export default createAlbumModal;

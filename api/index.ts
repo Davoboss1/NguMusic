@@ -5,6 +5,7 @@ import axios from "axios";
 import axiosRetry from 'axios-retry';
 import { router, useNavigation, useRouter } from "expo-router";
 
+//const BASE_URL = "https://ngumusic.pythonanywhere.com";
 const BASE_URL = "http://127.0.0.1:8000";
 
 const api = axios.create({
@@ -19,7 +20,7 @@ axiosRetry(api, {
     },
     onRetry: async () => {
         let status = await refreshToken();
-        
+
     },
 });
 
@@ -85,12 +86,21 @@ export const uploadTrack = async (data: { name: string, file: { name: string, ty
         },
     })).data;
 
+export const uploadAlbum = async (data: { name: string, thumbnail: { name: string, type: string, uri: string }, description: string }) =>
+    (await api.post("/create/albums/", getFormData(data), {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })).data;
 
 export const getGenres = async () =>
     (await api.get("/genres/")).data;
 
 export const getAlbums = async () =>
     (await api.get("/albums/")).data;
+
+export const getUserAlbums = async () =>
+    (await api.get("/users/albums/")).data;
 
 export const getAlbum = async (id: string) =>
     (await api.get(`/album/${id}/`)).data;

@@ -8,13 +8,14 @@ import { TextSize } from "@/constants/Size";
 import { usePersistedStore } from "@/stores";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { FlatList, Image, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TextStyle, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CreateMusicModal from "../../others/createMusicModal";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getTracks } from "@/api";
 import { track } from "@/types";
+import { EmptyDisplay } from "@/components/elements/EmptyDisplay";
 
 
 const IntroductionView = () => {
@@ -38,6 +39,7 @@ const IntroductionView = () => {
         featured_artists: track?.featured_artists
     }));
 
+
     return (<BackgroundView>
         <CreateMusicModal show={showCreateMusicModal} onClose={() => setShowCreateMusicModal(false)} />
         <View>
@@ -59,7 +61,7 @@ const IntroductionView = () => {
                 marginTop: 15
             }} icon={<FontAwesome name="search" size={18} color="grey" />} placeholder="Search for songs" />
 
-            <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 10 }}>
+            {/* <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 10 }}>
                 <TextButton textStyle={[styles.barButton, { color: Colors.primary }] as TextStyle} >
                     Singles
                 </TextButton>
@@ -72,16 +74,19 @@ const IntroductionView = () => {
                 <TextButton textStyle={styles.barButton} >
                     Favourites
                 </TextButton>
-            </View>
+            </View> */}
 
 
 
-            <FlatList ListHeaderComponent={<>
+            <FlatList contentContainerStyle={{
+                paddingBottom: 200,
+                marginTop: 10
+            }} ListHeaderComponent={<>
                 <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
                     <View style={styles.musciCardContainer}>
                         <View >
                             <Text style={styles.musicCardTextTitle}>Albums</Text>
-                            <Text style={styles.musicCardText} >20</Text>
+                            <Text style={styles.musicCardText} >...</Text>
 
                         </View>
                         <MaterialCommunityIcons name="album" size={20} color="white" />
@@ -90,7 +95,7 @@ const IntroductionView = () => {
                     <View style={styles.musciCardContainer}>
                         <View >
                             <Text style={styles.musicCardTextTitle}>Playlists</Text>
-                            <Text style={styles.musicCardText} >4</Text>
+                            <Text style={styles.musicCardText} >...</Text>
 
                         </View>
                         <MaterialCommunityIcons name="playlist-play" size={20} color="white" />
@@ -99,7 +104,7 @@ const IntroductionView = () => {
                     <View style={styles.musciCardContainer}>
                         <View >
                             <Text style={styles.musicCardTextTitle}>Songs</Text>
-                            <Text style={styles.musicCardText} >200</Text>
+                            <Text style={styles.musicCardText} >...</Text>
 
                         </View>
                         <MaterialCommunityIcons name="music" size={20} color="white" />
@@ -117,13 +122,15 @@ const IntroductionView = () => {
                         </TextButton>
                     </View>
                 </View>
+            </>} ListEmptyComponent={<>
+            {is_fetching ? <ActivityIndicator color={Colors.primary} size={"small"} /> : <EmptyDisplay />}
             </>} data={tracks} renderItem={({ item }) => <View style={styles.trackCardContainer}>
                 <Image style={styles.trackCardImage} source={Logo} />
                 <View style={{
                     marginLeft: 10
                 }}>
                     <Text style={styles.trackCardTitleText}>{item.name}</Text>
-                    <Text style={styles.trackCardText}>{item.artist} </Text>
+                    <Text style={styles.trackCardText}>{item.artist} • {item.featured_artists}</Text>
                     <Text style={styles.trackCardText}>{item.album_name} </Text>
                 </View>
                 <Link href={{ pathname: "/home/now_playing", params: {
@@ -136,6 +143,7 @@ const IntroductionView = () => {
             </View>} />
 
         </View>
+
     </BackgroundView>)
 }
 

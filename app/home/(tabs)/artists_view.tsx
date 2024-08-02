@@ -1,13 +1,14 @@
 import { getArtist, getSomeTracks } from "@/api";
 import BackgroundView from "@/components/containers/BackgroundView";
+import { EmptyDisplay } from "@/components/elements/EmptyDisplay";
 import { Colors } from "@/constants/Colors";
 import { TextSize } from "@/constants/Size"
 import { track } from "@/types";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { Link, useLocalSearchParams } from "expo-router";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { ScrollView } from "react-native-gesture-handler";
 
 const ArtistsView = () => {
@@ -57,6 +58,7 @@ const ArtistsView = () => {
         genre: track?.genre?.name,
         featured_artists: track?.featured_artists
     }));
+    const router = useRouter();
 
 
     return (
@@ -65,6 +67,9 @@ const ArtistsView = () => {
                 {artistData.artist_name}
             </Text>
             <ScrollView>
+                <>
+                    {isFetching && <ActivityIndicator style={{ marginTop: 10 }} color={Colors.primary} size={"small"} />}
+                </>
                 <View style={styles.mainContainer}>
                     <FontAwesome name="user-circle" size={70} style={{ marginBottom: 10 }} color="grey" />
                     {/* <Image style={[styles.thumbnail, {
@@ -105,6 +110,13 @@ const ArtistsView = () => {
                                 alignItems: "center",
                                 width: 100,
                                 alignSelf: "flex-start",
+                            }} onPress={() => {
+                                router.push({
+                                    pathname: "/home/albums_view",
+                                    params: {
+                                        id: album.id
+                                    }
+                                });
                             }}>
                                 <Image style={[styles.thumbnail, {
                                     height: 70,
@@ -133,6 +145,10 @@ const ArtistsView = () => {
                     }}>
                         Tracks
                     </Text>
+                    <>
+                        {tracks_is_fetching && <ActivityIndicator color={Colors.primary} size={"small"} />}
+                        {(tracksData?.length < 1 && !tracks_is_fetching) &&  <EmptyDisplay />}
+                    </>
                     {tracksData?.map((item) => (
                         <Link href={{
                             pathname: "/home/now_playing",
@@ -155,7 +171,7 @@ const ArtistsView = () => {
                                         {item.name}
                                     </Text>
                                     <Text style={{ color: "white", marginTop: 5 }}>
-                                        {item.artist}
+                                        {item.artist}  • {item.featured_artists}
                                     </Text>
                                 </View>
                                 <MaterialCommunityIcons name="chevron-right" size={24} color="white" style={{ marginLeft: "auto" }} />

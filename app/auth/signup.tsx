@@ -11,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Link, Redirect } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import Toast from "react-native-root-toast";
 
@@ -19,19 +19,20 @@ const SignupView = () => {
     const registerMutation = useMutation({
         mutationFn: RegisterUser,
         onSuccess() {
-            showToast("Registered successfully.", "success");  
+            showToast("Registered successfully.", "success");
         },
         onError(error: any) {
             let data: object = error?.response?.data;
-            
-            if(data) {
-                showToast(Object.values(data)[0].toString(),"error");
+
+            if (data) {
+                showToast(Object.values(data)[0].toString(), "error");
             }
         },
     });
     const [userInformation, setUserInformation] = useState({
         first_name: "",
         last_name: "",
+        artist_name: "",
         email: "",
         password: ""
     });
@@ -49,74 +50,81 @@ const SignupView = () => {
 
     return (
         <BackgroundView>
-            <View style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '85%',
-                marginHorizontal: "auto"
-            }}>
-                <Image style={{
-                    width: 70,
-                    height: 70,
-                }} source={Logo} />
-                <Text style={styles.mainText}>Welcome to NGU Music</Text>
-                <Text style={styles.titleText}> Create your account</Text>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>First Name</Text>
-                    <TextInput style={styles.input} placeholder="John" onChangeText={(text) => updateUserInformation("first_name", text)} />
-                </View>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Last Name</Text>
-                    <TextInput style={styles.input} placeholder="Bull" onChangeText={(text) => updateUserInformation("last_name", text)} />
-                </View>                
-
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Email Address</Text>
-                    <TextInput style={styles.input} placeholder="test@example.com" onChangeText={(text) => updateUserInformation("email", text)} />
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Password</Text>
-                    <TextInput style={styles.input} placeholder="Password" onChangeText={(text) => updateUserInformation("password", text)} secureTextEntry />
-                </View>
-
-                <GradientButton loading={registerMutation.isPending} style={{ marginTop: 25, width: "100%" }} onPress={() => {
-                    
-                    registerMutation.mutate(userInformation);
+            <ScrollView>
+                <View style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '85%',
+                    marginHorizontal: "auto",
+                    paddingVertical: 30
                 }}>
-                    Sign Up
-                </GradientButton>
+                    <Image style={{
+                        width: 70,
+                        height: 70,
+                    }} source={Logo} />
+                    <Text style={styles.mainText}>Welcome to NGU Music</Text>
+                    <Text style={styles.titleText}> Create your account</Text>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.inputLabel}>First Name</Text>
+                        <TextInput style={styles.input} placeholder="John" onChangeText={(text) => updateUserInformation("first_name", text)} />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.inputLabel}>Last Name</Text>
+                        <TextInput style={styles.input} placeholder="Bull" onChangeText={(text) => updateUserInformation("last_name", text)} />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.inputLabel}>Artist Name</Text>
+                        <TextInput style={styles.input} placeholder="Artisty" onChangeText={(text) => updateUserInformation("artist_name", text)} />
+                    </View>
 
-                <DoubleLinedText color={"grey"} containerStyle={{
-                    marginTop: 15
-                }}>
-                    Or continue with
-                </DoubleLinedText>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.inputLabel}>Email Address</Text>
+                        <TextInput style={styles.input} placeholder="test@example.com" onChangeText={(text) => updateUserInformation("email", text)} />
+                    </View>
 
-                <Button style={styles.googleBtn} textStyle={styles.googleBtnText}
-                    icon={<Image source={GoogleIcon} style={styles.googleIcon} />}
-                >
-                    Sign up with Google
-                </Button>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.inputLabel}>Password</Text>
+                        <TextInput style={styles.input} placeholder="Password" onChangeText={(text) => updateUserInformation("password", text)} secureTextEntry />
+                    </View>
 
-                <View style={[globalStyles.rowCenter, { marginTop: 15 }]}>
+                    <GradientButton loading={registerMutation.isPending} style={{ marginTop: 25, width: "100%" }} onPress={() => {
 
-                    <Text style={{
-                        color: "white"
+                        registerMutation.mutate(userInformation);
                     }}>
-                        Already have an account?
-                    </Text>
-                    <Link href={"/auth/login"} asChild>
-                        <TextButton textStyle={{
-                            color: Colors.primary,
-                            fontSize: 14
+                        Sign Up
+                    </GradientButton>
+
+                    <DoubleLinedText color={"grey"} containerStyle={{
+                        marginTop: 15
+                    }}>
+                        Or continue with
+                    </DoubleLinedText>
+
+                    <Button style={styles.googleBtn} textStyle={styles.googleBtnText}
+                        icon={<Image source={GoogleIcon} style={styles.googleIcon} />}
+                    >
+                        Sign up with Google
+                    </Button>
+
+                    <View style={[globalStyles.rowCenter, { marginTop: 15 }]}>
+
+                        <Text style={{
+                            color: "white"
                         }}>
-                            Sign in
-                        </TextButton>
-                    </Link>
+                            Already have an account?
+                        </Text>
+                        <Link href={"/auth/login"} asChild>
+                            <TextButton textStyle={{
+                                color: Colors.primary,
+                                fontSize: 14
+                            }}>
+                                Sign in
+                            </TextButton>
+                        </Link>
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </BackgroundView >
     )
 }

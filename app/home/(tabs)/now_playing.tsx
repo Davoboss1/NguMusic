@@ -28,23 +28,26 @@ const NowPlayingView = () => {
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
     useEffect(() => {
+        console.log("Init sound");
         (async () => {
-            const { sound } = await Audio.Sound.createAsync({ uri: track.file_link });
-            setSound(sound);
+            
         })();
     }, []);
     async function playSound() {
         console.log('Loading Sound');
+        const { sound: _sound } = await Audio.Sound.createAsync({ uri: track.file_link });
+        setSound(_sound);
 
-        if (sound) {
+        //if (sound) {
             console.log('Playing Sound');
-            await sound.playAsync();
+            await _sound.playAsync();
 
-            sound.setOnPlaybackStatusUpdate((status) => {
+            _sound.setOnPlaybackStatusUpdate((status) => {
                 if (status.isLoaded) {
                     let duration = Math.floor((status?.durationMillis || 0) / 1000);
                     setTotalDuration(duration);
                     max.value = duration;
+                    progress.value = 0;
                     if (status.isPlaying && duration > 0) {
                         const interval = setInterval(() => {
 
@@ -65,7 +68,7 @@ const NowPlayingView = () => {
             });
 
             setIsPlaying(true);
-        }
+    //    }
     }
 
     async function pauseSound() {
